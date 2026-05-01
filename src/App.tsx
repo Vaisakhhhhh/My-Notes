@@ -22,22 +22,35 @@ function App() {
   };
 
   const updateNote = (updatedNote: Note) => {
-    setNotes(prev => 
-      prev.map((note) => 
+    setNotes(prev =>
+      prev.map((note) =>
         note.id === updatedNote.id ? updatedNote : note
       )
     );
   };
 
+  const deleteNote = (id: string) => {
+    setNotes(prev => {
+      const newNotes = prev.filter((note) => note.id !== id);
+
+      if (id === activeNoteId) {
+        setActiveNoteId(newNotes[0]?.id || null);
+      }
+
+      return newNotes;
+    });
+  };
+
   return (
     <div className="flex gap-2">
-      <NotesList 
+      <NotesList
         notes={notes}
         activeNoteId={activeNoteId}
         onSelectNote={setActiveNoteId}
         onCreateNote={createNote}
+        onDeleteNote={deleteNote}
       />
-      <NoteEditor 
+      <NoteEditor
         note={activeNote}
         onUpdateNote={updateNote}
       />

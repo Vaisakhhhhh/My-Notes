@@ -5,6 +5,7 @@ type Props = {
     activeNoteId: string | null;
     onSelectNote: (id: string) => void;
     onCreateNote: () => void;
+    onDeleteNote: (id: string) => void;
 };
 
 function NotesList({
@@ -12,6 +13,7 @@ function NotesList({
     activeNoteId,
     onSelectNote,
     onCreateNote,
+    onDeleteNote,
 }: Props) {
     return (
         <div className="w-1/3 h-screen border-r border-gray-700 p-4">
@@ -26,14 +28,26 @@ function NotesList({
                 {notes.map(note => (
                     <div
                         key={note.id}
-                        onClick={() => onSelectNote(note.id)}
-                        className={`p-3 rounded cursor-pointer ${note.id === activeNoteId
+                        className={`p-3 rounded cursor-pointer flex justify-between items-center ${note.id === activeNoteId
                                 ? "bg-blue-600 text-white"
                                 : "bg-gray-800 text-gray-300"
                             }`}
+                        onClick={() => onSelectNote(note.id)}
                     >
-                        <h3 className="font-semibold">{note.title}</h3>
-                        <p className="text-sm truncate">{note.content || "No content"}</p>
+                        <div>
+                            <h3 className="font-semibold">{note.title}</h3>
+                            <p className="text-sm truncate">{note.content || "No content"}</p>
+                        </div>
+
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteNote(note.id);
+                            }}
+                            className="text-red-400 hover:text-red-600 ml-2"
+                        >
+                            ✕
+                        </button>
                     </div>
                 ))}
             </div>
