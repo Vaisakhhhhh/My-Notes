@@ -21,6 +21,14 @@ function App() {
     setActiveNoteId(newNote.id);
   };
 
+  const updateNote = (updatedNote: Note) => {
+    setNotes(prev => 
+      prev.map((note) => 
+        note.id === updatedNote.id ? updatedNote : note
+      )
+    );
+  };
+
   return (
     <div className="flex gap-2">
       <NotesList 
@@ -31,6 +39,7 @@ function App() {
       />
       <NoteEditor 
         note={activeNote}
+        onUpdateNote={updateNote}
       />
     </div>
   )
