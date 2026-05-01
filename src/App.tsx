@@ -9,10 +9,29 @@ function App() {
 
   const activeNote = notes.find(n => n.id === activeNoteId) || null;
 
+  const createNote = () => {
+    const newNote: Note = {
+      id: crypto.randomUUID(),
+      title: "Untitled Note",
+      content: "",
+      updatedAt: Date.now(),
+    };
+
+    setNotes(prev => [newNote, ...prev]);
+    setActiveNoteId(newNote.id);
+  };
+
   return (
-    <div style={{ display: "flex", gap: "20px" }}>
-      <NotesList />
-      <NoteEditor />
+    <div className="flex gap-2">
+      <NotesList 
+        notes={notes}
+        activeNoteId={activeNoteId}
+        onSelectNote={setActiveNoteId}
+        onCreateNote={createNote}
+      />
+      <NoteEditor 
+        note={activeNote}
+      />
     </div>
   )
 }
