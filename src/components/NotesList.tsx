@@ -3,6 +3,8 @@ import type { Note } from "../types/note";
 type Props = {
     notes: Note[];
     activeNoteId: string | null;
+    search: string;
+    onSearchNote: (id: string) => void;
     onSelectNote: (id: string) => void;
     onCreateNote: () => void;
     onDeleteNote: (id: string) => void;
@@ -11,12 +13,22 @@ type Props = {
 function NotesList({
     notes,
     activeNoteId,
+    search,
+    onSearchNote,
     onSelectNote,
     onCreateNote,
     onDeleteNote,
 }: Props) {
     return (
         <div className="w-1/3 h-screen border-r border-gray-700 p-4">
+            <input
+                type="text"
+                placeholder="Search notes..."
+                value={search}
+                onChange={(e) => onSearchNote(e.target.value)}
+                className="w-full mb-4 p-2 bg-gray-800 text-white rounded"
+            />
+
             <button
                 onClick={onCreateNote}
                 className="w-full mb-4 bg-blue-500 text-white py-2 rounded"
@@ -29,8 +41,8 @@ function NotesList({
                     <div
                         key={note.id}
                         className={`p-3 rounded cursor-pointer flex justify-between items-center ${note.id === activeNoteId
-                                ? "bg-blue-600 text-white"
-                                : "bg-gray-800 text-gray-300"
+                            ? "bg-blue-600 text-white"
+                            : "bg-gray-800 text-gray-300"
                             }`}
                         onClick={() => onSelectNote(note.id)}
                     >
