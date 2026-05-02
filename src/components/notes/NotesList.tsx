@@ -4,20 +4,24 @@ type Props = {
     notes: Note[];
     activeNoteId: string | null;
     search: string;
+    selectedTag: string | null;
     onSearchNote: (id: string) => void;
     onSelectNote: (id: string) => void;
     onCreateNote: () => void;
     onDeleteNote: (id: string) => void;
+    onSelectTag: (tag: string | null) => void;
 };
 
 function NotesList({
     notes,
     activeNoteId,
     search,
+    selectedTag,
     onSearchNote,
     onSelectNote,
     onCreateNote,
     onDeleteNote,
+    onSelectTag,
 }: Props) {
     return (
         <div className="w-1/3 max-w-sm h-screen border-r border-gray-700 p-4 overflow-hidden">
@@ -35,6 +39,27 @@ function NotesList({
             >
                 + New Note
             </button>
+
+            <div className="flex flex-wrap gap-2 mb-3">
+                <button
+                    onClick={() => onSelectTag(null)}
+                    className={`px-2 py-1 rounded ${selectedTag === null ? "bg-blue-500" : "bg-gray-700"
+                        }`}
+                >
+                    All
+                </button>
+
+                {[...new Set(notes.flatMap(note => note.tags))].map(tag => (
+                    <button
+                        key={tag}
+                        onClick={() => onSelectTag(tag)}
+                        className={`px-2 py-1 rounded ${selectedTag === tag ? "bg-blue-500" : "bg-gray-700"
+                            }`}
+                    >
+                        {tag}
+                    </button>
+                ))}
+            </div>
 
             <div className="space-y-2">
                 {notes.map(note => (

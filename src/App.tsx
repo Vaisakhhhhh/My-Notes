@@ -8,15 +8,24 @@ function App() {
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const { notes, setNotes } = useNotes();
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   const activeNote = notes.find(n => n.id === activeNoteId) || null;
 
   const searchTerm = search.toLowerCase();
 
-  const filteredNotes = notes.filter(note =>
-    note.title.toLowerCase().includes(searchTerm) ||
-    note.content.toLowerCase().includes(searchTerm)
-  );
+  const filteredNotes = notes
+    .filter(note => {
+      const matchesSearch =
+        note.title.toLowerCase().includes(searchTerm) ||
+        note.content.toLowerCase().includes(searchTerm);
+
+      const matchesTag =
+        !selectedTag || note.tags.includes(selectedTag);
+
+      return matchesSearch && matchesTag;
+    })
+    .sort((a, b) => b.updatedAt - a.updatedAt);
 
   const createNote = () => {
     const newNote: Note = {
@@ -57,10 +66,12 @@ function App() {
         notes={filteredNotes}
         activeNoteId={activeNoteId}
         search={search}
+        selectedTag={selectedTag}
         onSearchNote={setSearch}
         onSelectNote={setActiveNoteId}
         onCreateNote={createNote}
         onDeleteNote={deleteNote}
+        onSelectTag={setSelectedTag}
       />
       <NoteEditor
         note={activeNote}

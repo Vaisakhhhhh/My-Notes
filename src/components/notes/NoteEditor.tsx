@@ -64,7 +64,10 @@ function NoteEditor({ note, onUpdateNote }: Props) {
                 onChange={(e) =>
                     onUpdateNote({
                         ...note,
-                        tags: e.target.value.split(",").map(t => t.trim()),
+                        tags: e.target.value
+                            .split(",")
+                            .map(t => t.trim())
+                            .filter(t => t.length > 0),
                         updatedAt: Date.now(),
                     })
                 }
