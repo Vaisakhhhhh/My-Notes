@@ -1,21 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Note } from "./types/note";
-import NotesList from "./components/NotesList";
-import NoteEditor from "./components/NoteEditor";
+import NotesList from "./components/notes/NotesList";
+import NoteEditor from "./components/notes/NoteEditor";
+import { useNotes } from "./hooks/useNotes";
 
 function App() {
-  const [notes, setNotes] = useState<Note[]>(() => {
-    const savedNotes = localStorage.getItem('notes');
-    return savedNotes ? JSON.parse(savedNotes) : [];
-  });
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const { notes, setNotes } = useNotes();
 
   const activeNote = notes.find(n => n.id === activeNoteId) || null;
-
-  useEffect(() => {
-    localStorage.setItem('notes', JSON.stringify(notes));
-  }, [notes]);
 
   const searchTerm = search.toLowerCase();
 
@@ -29,6 +23,7 @@ function App() {
       id: crypto.randomUUID(),
       title: "Untitled Note",
       content: "",
+      tags: [],
       updatedAt: Date.now(),
     };
 

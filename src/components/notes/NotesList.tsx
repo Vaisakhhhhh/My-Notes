@@ -1,4 +1,4 @@
-import type { Note } from "../types/note";
+import type { Note } from "../../types/note";
 
 type Props = {
     notes: Note[];
@@ -20,7 +20,7 @@ function NotesList({
     onDeleteNote,
 }: Props) {
     return (
-        <div className="w-1/3 h-screen border-r border-gray-700 p-4">
+        <div className="w-1/3 max-w-sm h-screen border-r border-gray-700 p-4 overflow-hidden">
             <input
                 type="text"
                 placeholder="Search notes..."
@@ -46,9 +46,23 @@ function NotesList({
                             }`}
                         onClick={() => onSelectNote(note.id)}
                     >
-                        <div>
-                            <h3 className="font-semibold">{note.title}</h3>
-                            <p className="text-sm truncate">{note.content || "No content"}</p>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold truncate">{note.title}</h3>
+
+                            <p className="text-sm truncate">
+                                {note.content || "No content"}
+                            </p>
+
+                            <div className="flex flex-wrap gap-1 mt-1">
+                                {note.tags.slice(0, 3).map(tag => (
+                                    <span
+                                        key={tag}
+                                        className="text-xs bg-gray-700 px-2 py-1 rounded"
+                                    >
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
 
                         <button

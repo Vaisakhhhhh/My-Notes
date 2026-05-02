@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { Note } from "../types/note";
+import type { Note } from "../../types/note";
 
 type Props = {
     note: Note | null;
@@ -55,6 +55,20 @@ function NoteEditor({ note, onUpdateNote }: Props) {
                 onChange={e => handleChange("title", e.target.value)}
                 className="text-2xl font-bold bg-transparent border-b border-gray-600 outline-none"
                 placeholder="Title"
+            />
+
+            <input
+                type="text"
+                placeholder="Add tags (comma separated)"
+                value={note.tags.join(", ")}
+                onChange={(e) =>
+                    onUpdateNote({
+                        ...note,
+                        tags: e.target.value.split(",").map(t => t.trim()),
+                        updatedAt: Date.now(),
+                    })
+                }
+                className="p-2 bg-gray-800 text-white rounded"
             />
 
             <textarea
