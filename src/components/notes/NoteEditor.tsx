@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Note } from "../../types/note";
 
 type Props = {
@@ -10,6 +10,7 @@ function NoteEditor({ note, onUpdateNote }: Props) {
     const inputRef = useRef<HTMLInputElement>(null);
     const cursorPositions = useRef<Record<string, number>>({});
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const [tagInput, setTagInput] = useState("");
 
     useEffect(() => {
         if (!note) return;
@@ -46,6 +47,26 @@ function NoteEditor({ note, onUpdateNote }: Props) {
         cursorPositions.current[note.id] = e.currentTarget.selectionStart;
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+
+            const value = tagInput.trim();
+
+            if (!value) return;
+
+            if (!note.tags.includes(value)) {
+                onUpdateNote({
+                    ...note,
+                    tags: [...note.tags, value],
+                    updatedAt: Date.now(),
+                });
+            }
+
+            setTagInput("");
+        }
+    };
+
     return (
         <div className="flex-1 p-4 flex flex-col gap-4">
             <input
@@ -57,22 +78,38 @@ function NoteEditor({ note, onUpdateNote }: Props) {
                 placeholder="Title"
             />
 
-            <input
-                type="text"
-                placeholder="Add tags (comma separated)"
-                value={note.tags.join(", ")}
-                onChange={(e) =>
-                    onUpdateNote({
-                        ...note,
-                        tags: e.target.value
-                            .split(",")
-                            .map(t => t.trim())
-                            .filter(t => t.length > 0),
-                        updatedAt: Date.now(),
-                    })
-                }
-                className="p-2 bg-gray-800 text-white rounded"
-            />
+            <div className="flex flex-wrap gap-2 p-2  rounded">
+
+                {note.tags.map(tag => (
+                    <span
+                        key={tag}
+                        className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white rounded"
+                    >
+                        {tag}
+                        <button
+                            onClick={() => {
+                                if (!note) return;
+
+                                onUpdateNote({
+                                    ...note,
+                                    tags: note.tags.filter(t => t !== tag),
+                                    updatedAt: Date.now(),
+                                });
+                            }}
+                        >
+                            ✕
+                        </button>
+                    </span>
+                ))}
+
+                <input
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="bg-transparent outline-none text-black"
+                    placeholder="Add tag..."
+                />
+            </div>
 
             <textarea
                 ref={textareaRef}
