@@ -1,28 +1,55 @@
+import { useEffect, useRef, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import type { Note } from "../../types/note";
 
 type Props = {
     notes: Note[];
+    allTags: string[];
     activeNoteId: string | null;
     search: string;
-    selectedTag: string | null;
+    selectedTags: string[];
     onSearchNote: (id: string) => void;
     onSelectNote: (id: string) => void;
     onCreateNote: () => void;
     onDeleteNote: (id: string) => void;
-    onSelectTag: (tag: string | null) => void;
+    onSelectTags: Dispatch<SetStateAction<string[]>>;
 };
 
 function NotesList({
     notes,
+    allTags,
     activeNoteId,
     search,
-    selectedTag,
+    selectedTags,
     onSearchNote,
     onSelectNote,
     onCreateNote,
     onDeleteNote,
-    onSelectTag,
+    onSelectTags,
 }: Props) {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const MAX_VISIBLE_TAGS = 2;
+    const visibleTags = selectedTags.slice(0, MAX_VISIBLE_TAGS);
+    const remainingCount = selectedTags.length - visibleTags.length;
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target as Node)
+            ) {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
     return (
         <div className="w-1/3 max-w-sm h-screen border-r border-gray-700 p-4 overflow-hidden">
             <input
@@ -40,25 +67,83 @@ function NotesList({
                 + New Note
             </button>
 
-            <div className="flex flex-wrap gap-2 mb-3">
-                <button
-                    onClick={() => onSelectTag(null)}
-                    className={`px-2 py-1 rounded ${selectedTag === null ? "bg-blue-500" : "bg-gray-700"
-                        }`}
-                >
-                    All
-                </button>
+            <div ref={dropdownRef} className="relative mb-4">
+                <div className="flex items-center justify-between mb-3">
 
-                {[...new Set(notes.flatMap(note => note.tags))].map(tag => (
+                    {/* Left */}
                     <button
-                        key={tag}
-                        onClick={() => onSelectTag(tag)}
-                        className={`px-2 py-1 rounded ${selectedTag === tag ? "bg-blue-500" : "bg-gray-700"
-                            }`}
+                        onClick={() => setIsOpen(prev => !prev)}
+                        className="px-3 py-2 bg-gray-800 text-white rounded"
                     >
-                        {tag}
+                        {selectedTags.length > 0 ? `Filter (${selectedTags.length})` : "Filter Tags"}
                     </button>
-                ))}
+
+                    {/* Middle */}
+                    <div className="flex items-center gap-2 overflow-visible">
+
+                        {visibleTags.map(tag => (
+                            <span
+                                key={tag}
+                                className="bg-blue-600 px-2 py-1 rounded text-xs whitespace-nowrap"
+                            >
+                                {tag}
+                            </span>
+                        ))}
+
+                        {remainingCount > 0 && (
+                            <div className="relative group">
+                                <span className="text-xs text-gray-400 cursor-pointer">
+                                    +{remainingCount} more
+                                </span>
+
+                                {/* Tooltip */}
+                                <div className="absolute hidden group-hover:block top-full mt-1 bg-gray-900 text-white text-xs p-2 rounded shadow-lg z-20">
+                                    {selectedTags.join(", ")}
+                                </div>
+                            </div>
+                        )}
+
+                    </div>
+
+                    {/* Right */}
+                    {selectedTags.length > 0 && (
+                        <button
+                            onClick={() => onSelectTags([])}
+                            className="text-red-400 hover:text-red-600"
+                        >
+                            ✕
+                        </button>
+                    )}
+
+                </div>
+
+                {isOpen && (
+                    <div className="absolute w-48 bg-white border border-gray-700 rounded shadow-lg p-2 z-10">
+                        {allTags.length === 0 ? (
+                            <p className="text-gray-400 text-sm">No tags</p>
+                        ) : (
+                            allTags.map(tag => (
+                                <label
+                                    key={tag}
+                                    className="flex items-center gap-2 p-1 cursor-pointer"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedTags.includes(tag)}
+                                        onChange={() => {
+                                            onSelectTags((prev: string[]) =>
+                                                prev.includes(tag)
+                                                    ? prev.filter(t => t !== tag)
+                                                    : [...prev, tag]
+                                            );
+                                        }}
+                                    />
+                                    <span className="text-sm">{tag}</span>
+                                </label>
+                            ))
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className="space-y-2">

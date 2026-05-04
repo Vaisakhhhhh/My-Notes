@@ -8,11 +8,14 @@ function App() {
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const { notes, setNotes } = useNotes();
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const activeNote = notes.find(n => n.id === activeNoteId) || null;
 
   const searchTerm = search.toLowerCase();
+
+  const allTags = [...new Set(notes.flatMap(note => note.tags))]
+    .sort((a, b) => a.localeCompare(b));
 
   const filteredNotes = notes
     .filter(note => {
@@ -21,7 +24,8 @@ function App() {
         note.content.toLowerCase().includes(searchTerm);
 
       const matchesTag =
-        !selectedTag || note.tags.includes(selectedTag);
+        selectedTags.length === 0 ||
+        selectedTags.every(tag => note.tags.includes(tag));
 
       return matchesSearch && matchesTag;
     })
@@ -64,14 +68,15 @@ function App() {
     <div className="flex gap-2">
       <NotesList
         notes={filteredNotes}
+        allTags={allTags}
         activeNoteId={activeNoteId}
         search={search}
-        selectedTag={selectedTag}
+        selectedTags={selectedTags}
         onSearchNote={setSearch}
         onSelectNote={setActiveNoteId}
         onCreateNote={createNote}
         onDeleteNote={deleteNote}
-        onSelectTag={setSelectedTag}
+        onSelectTags={setSelectedTags}
       />
       <NoteEditor
         note={activeNote}
