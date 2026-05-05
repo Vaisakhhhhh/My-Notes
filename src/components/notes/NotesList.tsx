@@ -52,102 +52,108 @@ function NotesList({
     }, []);
 
     return (
-        <div className="w-1/3 max-w-sm h-screen border-r border-gray-700 p-4 overflow-hidden">
-            <input
-                type="text"
-                placeholder="Search notes..."
-                value={search}
-                onChange={(e) => onSearchNote(e.target.value)}
-                className="w-full mb-4 p-2 bg-gray-800 text-white rounded"
-            />
+        <div className="w-1/4 h-screen border-r border-gray-700 flex flex-col">
 
-            <button
-                onClick={onCreateNote}
-                className="w-full mb-4 bg-blue-500 text-white py-2 rounded"
-            >
-                + New Note
-            </button>
+            {/* Top section (fixed) */}
+            <div className="p-4">
+                {/* Filter button + search + tags UI */}
+                <input
+                    type="text"
+                    placeholder="Search notes..."
+                    value={search}
+                    onChange={(e) => onSearchNote(e.target.value)}
+                    className="w-full mb-4 p-2 bg-gray-800 text-white rounded"
+                />
 
-            <div ref={dropdownRef} className="relative mb-4">
-                <div className="flex items-center justify-between mb-3">
+                <button
+                    onClick={onCreateNote}
+                    className="w-full mb-4 bg-blue-500 text-white py-2 rounded"
+                >
+                    + New Note
+                </button>
 
-                    {/* Left */}
-                    <button
-                        onClick={() => setIsOpen(prev => !prev)}
-                        className="px-3 py-2 bg-gray-800 text-white rounded"
-                    >
-                        {selectedTags.length > 0 ? `Filter (${selectedTags.length})` : "Filter Tags"}
-                    </button>
+                <div ref={dropdownRef} className="relative">
+                    <div className="flex items-center justify-between">
 
-                    {/* Middle */}
-                    <div className="flex items-center gap-2 overflow-visible">
+                        {/* Left */}
+                        <button
+                            onClick={() => setIsOpen(prev => !prev)}
+                            className="px-3 py-2 bg-gray-800 text-white rounded"
+                        >
+                            {selectedTags.length > 0 ? `Filter (${selectedTags.length})` : "Filter Tags"}
+                        </button>
 
-                        {visibleTags.map(tag => (
-                            <span
-                                key={tag}
-                                className="bg-blue-600 px-2 py-1 rounded text-xs whitespace-nowrap"
-                            >
-                                {tag}
-                            </span>
-                        ))}
+                        {/* Middle */}
+                        <div className="flex items-center gap-2 overflow-visible">
 
-                        {remainingCount > 0 && (
-                            <div className="relative group">
-                                <span className="text-xs text-gray-400 cursor-pointer">
-                                    +{remainingCount} more
+                            {visibleTags.map(tag => (
+                                <span
+                                    key={tag}
+                                    className="bg-blue-600 px-2 py-1 rounded text-xs whitespace-nowrap"
+                                >
+                                    {tag}
                                 </span>
+                            ))}
 
-                                {/* Tooltip */}
-                                <div className="absolute hidden group-hover:block top-full mt-1 bg-gray-900 text-white text-xs p-2 rounded shadow-lg z-20">
-                                    {selectedTags.join(", ")}
+                            {remainingCount > 0 && (
+                                <div className="relative group">
+                                    <span className="text-xs text-gray-400 cursor-pointer">
+                                        +{remainingCount} more
+                                    </span>
+
+                                    {/* Tooltip */}
+                                    <div className="absolute hidden group-hover:block top-full mt-1 bg-gray-900 text-white text-xs p-2 rounded shadow-lg z-20">
+                                        {selectedTags.join(", ")}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
+
+                        </div>
+
+                        {/* Right */}
+                        {selectedTags.length > 0 && (
+                            <button
+                                onClick={() => onSelectTags([])}
+                                className="text-red-400 hover:text-red-600"
+                            >
+                                ✕
+                            </button>
                         )}
 
                     </div>
 
-                    {/* Right */}
-                    {selectedTags.length > 0 && (
-                        <button
-                            onClick={() => onSelectTags([])}
-                            className="text-red-400 hover:text-red-600"
-                        >
-                            ✕
-                        </button>
+                    {isOpen && (
+                        <div className="absolute w-48 bg-white border border-gray-700 rounded shadow-lg p-2 z-10">
+                            {allTags.length === 0 ? (
+                                <p className="text-gray-400 text-sm">No tags</p>
+                            ) : (
+                                allTags.map(tag => (
+                                    <label
+                                        key={tag}
+                                        className="flex items-center gap-2 p-1 cursor-pointer"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedTags.includes(tag)}
+                                            onChange={() => {
+                                                onSelectTags((prev: string[]) =>
+                                                    prev.includes(tag)
+                                                        ? prev.filter(t => t !== tag)
+                                                        : [...prev, tag]
+                                                );
+                                            }}
+                                        />
+                                        <span className="text-sm">{tag}</span>
+                                    </label>
+                                ))
+                            )}
+                        </div>
                     )}
-
                 </div>
 
-                {isOpen && (
-                    <div className="absolute w-48 bg-white border border-gray-700 rounded shadow-lg p-2 z-10">
-                        {allTags.length === 0 ? (
-                            <p className="text-gray-400 text-sm">No tags</p>
-                        ) : (
-                            allTags.map(tag => (
-                                <label
-                                    key={tag}
-                                    className="flex items-center gap-2 p-1 cursor-pointer"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedTags.includes(tag)}
-                                        onChange={() => {
-                                            onSelectTags((prev: string[]) =>
-                                                prev.includes(tag)
-                                                    ? prev.filter(t => t !== tag)
-                                                    : [...prev, tag]
-                                            );
-                                        }}
-                                    />
-                                    <span className="text-sm">{tag}</span>
-                                </label>
-                            ))
-                        )}
-                    </div>
-                )}
             </div>
 
-            <div className="space-y-2">
+            <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-2">
                 {notes.map(note => (
                     <div
                         key={note.id}
