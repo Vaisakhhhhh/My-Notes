@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { Note } from "../../types/note";
 import React from "react";
+import { useTheme } from "../../context/useTheme";
 
 type Props = {
     notes: Note[];
@@ -33,6 +34,7 @@ function NotesList({
     const MAX_VISIBLE_TAGS = 2;
     const visibleTags = selectedTags.slice(0, MAX_VISIBLE_TAGS);
     const remainingCount = selectedTags.length - visibleTags.length;
+    const { theme, toggleTheme } = useTheme();
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -52,11 +54,17 @@ function NotesList({
     }, []);
 
     return (
-        <div className="w-1/4 h-screen border-r border-gray-700 flex flex-col">
+        <div className="w-1/4 h-screen border-r border-gray-700 flex flex-col bg-white text-black dark:bg-gray-900 dark:text-white">
 
             {/* Top section (fixed) */}
             <div className="p-4">
                 {/* Filter button + search + tags UI */}
+                <button
+                    onClick={toggleTheme}
+                    className="px-3 py-2 bg-gray-800 dark:bg-gray-700 text-white rounded mb-2"
+                >
+                    {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                </button>
                 <input
                     type="text"
                     placeholder="Search notes..."

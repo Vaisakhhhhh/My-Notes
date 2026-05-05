@@ -68,7 +68,7 @@ function App() {
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex">
       <NotesList
         notes={filteredNotes}
         allTags={allTags}

@@ -28,7 +28,7 @@ function NoteEditor({ note, onUpdateNote }: Props) {
 
     if (!note) {
         return (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
+            <div className="flex-1 flex items-center justify-center bg-white text-black dark:bg-gray-900 dark:text-white">
                 Select or create a note
             </div>
         );
@@ -68,7 +68,7 @@ function NoteEditor({ note, onUpdateNote }: Props) {
     };
 
     return (
-        <div className="flex-1 p-4 flex flex-col gap-4">
+        <div className="flex-1 p-4 flex flex-col gap-4 bg-white text-black dark:bg-gray-900 dark:text-white">
             <input
                 ref={inputRef}
                 type="text"
@@ -119,7 +119,7 @@ function NoteEditor({ note, onUpdateNote }: Props) {
                     handleCursor(e);
                 }}
                 onSelect={handleCursor}
-                className="flex-1 bg-transparent outline-none text-gray-600 resize-none"
+                className="flex-1 bg-transparent outline-none text-gray-700 dark:text-gray-200 resize-none"
                 placeholder="Write your note..."
             />
         </div>
