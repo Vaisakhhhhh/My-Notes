@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Note } from "./types/note";
 import NotesList from "./components/notes/NotesList";
 import NoteEditor from "./components/notes/NoteEditor";
@@ -12,24 +12,27 @@ function App() {
 
   const activeNote = notes.find(n => n.id === activeNoteId) || null;
 
-  const searchTerm = search.toLowerCase();
+  const allTags = useMemo(() => {
+    return [...new Set(notes.flatMap(note => note.tags))]
+      .sort((a, b) => a.localeCompare(b));
+  }, [notes]);
 
-  const allTags = [...new Set(notes.flatMap(note => note.tags))]
-    .sort((a, b) => a.localeCompare(b));
+  const filteredNotes = useMemo(() => {
+    return notes
+      .filter(note => {
+        const searchTerm = search.toLowerCase();
+        const matchesSearch =
+          note.title.toLowerCase().includes(searchTerm) ||
+          note.content.toLowerCase().includes(searchTerm);
 
-  const filteredNotes = notes
-    .filter(note => {
-      const matchesSearch =
-        note.title.toLowerCase().includes(searchTerm) ||
-        note.content.toLowerCase().includes(searchTerm);
+        const matchesTag =
+          selectedTags.length === 0 ||
+          selectedTags.every(tag => note.tags.includes(tag));
 
-      const matchesTag =
-        selectedTags.length === 0 ||
-        selectedTags.every(tag => note.tags.includes(tag));
-
-      return matchesSearch && matchesTag;
-    })
-    .sort((a, b) => b.updatedAt - a.updatedAt);
+        return matchesSearch && matchesTag;
+      })
+      .sort((a, b) => b.updatedAt - a.updatedAt);
+  }, [notes, search, selectedTags]);
 
   const createNote = () => {
     const newNote: Note = {

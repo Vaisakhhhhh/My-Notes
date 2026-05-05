@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { Note } from "../../types/note";
+import React from "react";
 
 type Props = {
     notes: Note[];
@@ -191,4 +192,4 @@ function NotesList({
     )
 }
 
-export default NotesList;
+export default React.memo(NotesList);
