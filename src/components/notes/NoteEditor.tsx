@@ -9,8 +9,8 @@ type Props = {
 
 function NoteEditor({ note, onUpdateNote }: Props) {
     const inputRef = useRef<HTMLInputElement>(null);
-    const cursorPositions = useRef<Record<string, number>>({});
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const cursorPositions = useRef<Record<string, number>>({});
     const [tagInput, setTagInput] = useState("");
 
     useEffect(() => {
@@ -23,6 +23,10 @@ function NoteEditor({ note, onUpdateNote }: Props) {
             textareaRef.current.setSelectionRange(savedPos, savedPos);
         } else if (inputRef.current) {
             inputRef.current.focus();
+        }
+
+        if (textareaRef.current) {
+            textareaRef.current.scrollTop = 0;
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [note?.id]);
