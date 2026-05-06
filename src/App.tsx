@@ -1,40 +1,33 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { Note } from "./types/note";
 import NotesList from "./components/notes/NotesList";
 import NoteEditor from "./components/notes/NoteEditor";
 import { useNotes } from "./hooks/useNotes";
+import { useFilteredNotes } from "./hooks/useFilteredNotes";
+import { useAllTags } from "./hooks/useAllTags";
+
 
 function App() {
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const { notes, setNotes } = useNotes();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const activeNote = notes.find(n => n.id === activeNoteId) || null;
 
-  const allTags = useMemo(() => {
-    return [...new Set(notes.flatMap(note => note.tags))]
-      .sort((a, b) => a.localeCompare(b));
-  }, [notes]);
+  const { notes, setNotes } = useNotes();
+  const filteredNotes = useFilteredNotes({
+    notes,
+    search,
+    selectedTags,
+  });
+  const allTags = useAllTags(notes);
 
-  const filteredNotes = useMemo(() => {
-    return notes
-      .filter(note => {
-        const searchTerm = search.toLowerCase();
-        const matchesSearch =
-          note.title.toLowerCase().includes(searchTerm) ||
-          note.content.toLowerCase().includes(searchTerm);
 
-        const matchesTag =
-          selectedTags.length === 0 ||
-          selectedTags.every(tag => note.tags.includes(tag));
+  const activeNote = useMemo(() => {
+    return notes.find(n => n.id === activeNoteId) || null;
+  }, [notes, activeNoteId]);
 
-        return matchesSearch && matchesTag;
-      })
-      .sort((a, b) => b.updatedAt - a.updatedAt);
-  }, [notes, search, selectedTags]);
 
-  const createNote = () => {
+  const createNote = useCallback(() => {
     const newNote: Note = {
       id: crypto.randomUUID(),
       title: "Untitled Note",
@@ -45,17 +38,17 @@ function App() {
 
     setNotes(prev => [newNote, ...prev]);
     setActiveNoteId(newNote.id);
-  };
+  }, [setNotes]);
 
-  const updateNote = (updatedNote: Note) => {
+  const updateNote = useCallback((updatedNote: Note) => {
     setNotes(prev =>
       prev.map((note) =>
         note.id === updatedNote.id ? updatedNote : note
       )
     );
-  };
+  }, [setNotes]);
 
-  const deleteNote = (id: string) => {
+  const deleteNote = useCallback((id: string) => {
     setNotes(prev => {
       const newNotes = prev.filter((note) => note.id !== id);
 
@@ -65,7 +58,8 @@ function App() {
 
       return newNotes;
     });
-  };
+  }, [setNotes, activeNoteId]);
+
 
   return (
     <div className="flex">
@@ -79,7 +73,7 @@ function App() {
         onSelectNote={setActiveNoteId}
         onCreateNote={createNote}
         onDeleteNote={deleteNote}
-        onSelectTags={setSelectedTags}
+        onChangeTags={setSelectedTags}
       />
       <NoteEditor
         note={activeNote}

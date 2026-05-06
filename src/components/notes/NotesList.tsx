@@ -3,6 +3,8 @@ import type { Dispatch, SetStateAction } from "react";
 import type { Note } from "../../types/note";
 import React from "react";
 import { useTheme } from "../../context/useTheme";
+import Button from "../ui/Button";
+import TagChip from "../ui/TagChip";
 
 type Props = {
     notes: Note[];
@@ -14,7 +16,7 @@ type Props = {
     onSelectNote: (id: string) => void;
     onCreateNote: () => void;
     onDeleteNote: (id: string) => void;
-    onSelectTags: Dispatch<SetStateAction<string[]>>;
+    onChangeTags: Dispatch<SetStateAction<string[]>>;
 };
 
 function NotesList({
@@ -27,7 +29,7 @@ function NotesList({
     onSelectNote,
     onCreateNote,
     onDeleteNote,
-    onSelectTags,
+    onChangeTags,
 }: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -59,12 +61,12 @@ function NotesList({
             {/* Top section (fixed) */}
             <div className="p-4">
                 {/* Filter button + search + tags UI */}
-                <button
+                <Button
                     onClick={toggleTheme}
-                    className="px-3 py-2 bg-gray-800 dark:bg-gray-700 text-white rounded mb-2"
+                    className="bg-gray-800 dark:bg-gray-700 text-white rounded mb-2"
                 >
                     {theme === "dark" ? "Light Mode" : "Dark Mode"}
-                </button>
+                </Button>
                 <input
                     type="text"
                     placeholder="Search notes..."
@@ -73,23 +75,22 @@ function NotesList({
                     className="w-full mb-4 p-2 bg-gray-800 text-white rounded"
                 />
 
-                <button
-                    onClick={onCreateNote}
-                    className="w-full mb-4 bg-blue-500 text-white py-2 rounded"
+                <Button onClick={onCreateNote}
+                    className="w-full mb-4 bg-blue-500 text-white rounded"
                 >
                     + New Note
-                </button>
+                </Button>
 
                 <div ref={dropdownRef} className="relative">
                     <div className="flex items-center justify-between">
 
                         {/* Left */}
-                        <button
+                        <Button
                             onClick={() => setIsOpen(prev => !prev)}
-                            className="px-3 py-2 bg-gray-800 text-white rounded"
+                            className="bg-gray-800 text-white rounded"
                         >
                             {selectedTags.length > 0 ? `Filter (${selectedTags.length})` : "Filter Tags"}
-                        </button>
+                        </Button>
 
                         {/* Middle */}
                         <div className="flex items-center gap-2 overflow-visible">
@@ -121,7 +122,7 @@ function NotesList({
                         {/* Right */}
                         {selectedTags.length > 0 && (
                             <button
-                                onClick={() => onSelectTags([])}
+                                onClick={() => onChangeTags([])}
                                 className="text-red-400 hover:text-red-600"
                             >
                                 ✕
@@ -144,7 +145,7 @@ function NotesList({
                                             type="checkbox"
                                             checked={selectedTags.includes(tag)}
                                             onChange={() => {
-                                                onSelectTags((prev: string[]) =>
+                                                onChangeTags((prev: string[]) =>
                                                     prev.includes(tag)
                                                         ? prev.filter(t => t !== tag)
                                                         : [...prev, tag]
@@ -180,12 +181,7 @@ function NotesList({
 
                             <div className="flex flex-wrap gap-1 mt-1">
                                 {note.tags.slice(0, 3).map(tag => (
-                                    <span
-                                        key={tag}
-                                        className="text-xs bg-gray-700 px-2 py-1 rounded"
-                                    >
-                                        {tag}
-                                    </span>
+                                    <TagChip key={tag} label={tag} className="bg-gray-700" />
                                 ))}
                             </div>
                         </div>
