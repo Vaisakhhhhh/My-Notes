@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Note } from "../../types/note";
+import TagChip from "../ui/TagChip";
 
 type Props = {
     note: Note | null;
@@ -67,6 +68,17 @@ function NoteEditor({ note, onUpdateNote }: Props) {
         }
     };
 
+    const removeTag = (tag: string) => {
+        if (!note) return;
+
+        onUpdateNote({
+            ...note,
+            tags: note.tags.filter(t => t !== tag),
+            // eslint-disable-next-line react-hooks/purity
+            updatedAt: Date.now(),
+        });
+    };
+
     return (
         <div className="flex-1 p-4 flex flex-col gap-4 bg-white text-black dark:bg-gray-900 dark:text-white">
             <input
@@ -81,25 +93,11 @@ function NoteEditor({ note, onUpdateNote }: Props) {
             <div className="flex flex-wrap gap-2 p-2  rounded">
 
                 {note.tags.map(tag => (
-                    <span
+                    <TagChip
                         key={tag}
-                        className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white rounded"
-                    >
-                        {tag}
-                        <button
-                            onClick={() => {
-                                if (!note) return;
-
-                                onUpdateNote({
-                                    ...note,
-                                    tags: note.tags.filter(t => t !== tag),
-                                    updatedAt: Date.now(),
-                                });
-                            }}
-                        >
-                            ✕
-                        </button>
-                    </span>
+                        label={tag}
+                        onRemove={() => removeTag(tag)}
+                    />
                 ))}
 
                 <input
