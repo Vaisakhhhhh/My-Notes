@@ -14,7 +14,7 @@ type Props = {
     onSelectNote: (id: string) => void;
     onCreateNote: () => void;
     onDeleteNote: (id: string) => void;
-    onSelectTags: Dispatch<SetStateAction<string[]>>;
+    onChangeTags: Dispatch<SetStateAction<string[]>>;
 };
 
 function NotesList({
@@ -27,7 +27,7 @@ function NotesList({
     onSelectNote,
     onCreateNote,
     onDeleteNote,
-    onSelectTags,
+    onChangeTags,
 }: Props) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -121,7 +121,7 @@ function NotesList({
                         {/* Right */}
                         {selectedTags.length > 0 && (
                             <button
-                                onClick={() => onSelectTags([])}
+                                onClick={() => onChangeTags([])}
                                 className="text-red-400 hover:text-red-600"
                             >
                                 ✕
@@ -144,7 +144,7 @@ function NotesList({
                                             type="checkbox"
                                             checked={selectedTags.includes(tag)}
                                             onChange={() => {
-                                                onSelectTags((prev: string[]) =>
+                                                onChangeTags((prev: string[]) =>
                                                     prev.includes(tag)
                                                         ? prev.filter(t => t !== tag)
                                                         : [...prev, tag]
