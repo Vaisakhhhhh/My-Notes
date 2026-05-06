@@ -1,38 +1,27 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { Note } from "./types/note";
 import NotesList from "./components/notes/NotesList";
 import NoteEditor from "./components/notes/NoteEditor";
 import { useNotes } from "./hooks/useNotes";
+import { useFilteredNotes } from "./hooks/useFilteredNotes";
+import { useAllTags } from "./hooks/useAllTags";
 
 function App() {
+  const { notes, setNotes } = useNotes();
+  
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const { notes, setNotes } = useNotes();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const activeNote = notes.find(n => n.id === activeNoteId) || null;
-
-  const allTags = useMemo(() => {
-    return [...new Set(notes.flatMap(note => note.tags))]
-      .sort((a, b) => a.localeCompare(b));
-  }, [notes]);
-
-  const filteredNotes = useMemo(() => {
-    return notes
-      .filter(note => {
-        const searchTerm = search.toLowerCase();
-        const matchesSearch =
-          note.title.toLowerCase().includes(searchTerm) ||
-          note.content.toLowerCase().includes(searchTerm);
-
-        const matchesTag =
-          selectedTags.length === 0 ||
-          selectedTags.every(tag => note.tags.includes(tag));
-
-        return matchesSearch && matchesTag;
-      })
-      .sort((a, b) => b.updatedAt - a.updatedAt);
-  }, [notes, search, selectedTags]);
+  
+  const filteredNotes = useFilteredNotes({
+    notes,
+    search,
+    selectedTags,
+  });
+  
+  const allTags = useAllTags(notes);
 
   const createNote = () => {
     const newNote: Note = {
