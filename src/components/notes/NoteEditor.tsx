@@ -1,6 +1,36 @@
-import { useEffect, useRef, useState } from "react";
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import TaskItem from '@tiptap/extension-task-item';
+import TaskList from '@tiptap/extension-task-list';
+import { Color } from '@tiptap/extension-color';
+import { TextStyle } from '@tiptap/extension-text-style';
+
+import { useState, useEffect } from "react";
 import type { Note } from "../../types/note";
+
 import TagChip from "../ui/TagChip";
+import Toolbar from './Toolbar';
+
+
+const CustomTaskList = TaskList.extend({
+    addAttributes() {
+        return {
+            strikethrough: {
+                default: false,
+                parseHTML: element => element.hasAttribute('data-strikethrough'),
+                renderHTML: attributes => {
+                    if (!attributes.strikethrough) {
+                        return {};
+                    }
+                    return {
+                        'data-strikethrough': 'true',
+                        class: 'strikethrough-list',
+                    };
+                },
+            },
+        };
+    },
+});
 
 type Props = {
     note: Note | null;
@@ -8,28 +38,38 @@ type Props = {
 };
 
 function NoteEditor({ note, onUpdateNote }: Props) {
-    const inputRef = useRef<HTMLInputElement>(null);
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const cursorPositions = useRef<Record<string, number>>({});
     const [tagInput, setTagInput] = useState("");
 
+    //^ Initialize Tiptap editor
+
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            CustomTaskList,
+            TaskItem.configure({
+                nested: true,
+            }),
+            TextStyle,
+            Color,
+        ],
+        content: note?.content,
+        onUpdate({ editor }) {
+            handleChange("content", editor.getHTML());
+        },
+        editorProps: {
+            attributes: {
+                class: 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none max-w-none dark:prose-invert',
+            },
+        },
+    });
+
+    // Update editor content when switching notes
     useEffect(() => {
-        if (!note) return;
-
-        const savedPos = cursorPositions.current[note.id];
-
-        if (savedPos !== undefined && textareaRef.current) {
-            textareaRef.current.focus();
-            textareaRef.current.setSelectionRange(savedPos, savedPos);
-        } else if (inputRef.current) {
-            inputRef.current.focus();
+        if (editor && note && note.content !== editor.getHTML()) {
+            editor.commands.setContent(note.content || '');
         }
+    }, [editor, note?.id]);
 
-        if (textareaRef.current) {
-            textareaRef.current.scrollTop = 0;
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [note?.id]);
 
     if (!note) {
         return (
@@ -39,6 +79,9 @@ function NoteEditor({ note, onUpdateNote }: Props) {
         );
     }
 
+
+    //^ Handle content changes
+
     const handleChange = (field: "title" | "content", value: string) => {
         onUpdateNote({
             ...note,
@@ -47,10 +90,8 @@ function NoteEditor({ note, onUpdateNote }: Props) {
         });
     };
 
-    const handleCursor = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
-        if (!note) return;
-        cursorPositions.current[note.id] = e.currentTarget.selectionStart;
-    };
+
+    //^ Tag handling
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
@@ -83,10 +124,11 @@ function NoteEditor({ note, onUpdateNote }: Props) {
         });
     };
 
+
+
     return (
         <div className="flex-1 p-4 flex flex-col gap-4 bg-white text-black dark:bg-gray-900 dark:text-white">
             <input
-                ref={inputRef}
                 type="text"
                 value={note.title}
                 onChange={e => handleChange("title", e.target.value)}
@@ -113,17 +155,12 @@ function NoteEditor({ note, onUpdateNote }: Props) {
                 />
             </div>
 
-            <textarea
-                ref={textareaRef}
-                value={note.content}
-                onChange={e => {
-                    handleChange("content", e.target.value);
-                    handleCursor(e);
-                }}
-                onSelect={handleCursor}
-                className="flex-1 bg-transparent outline-none text-gray-700 dark:text-gray-200 resize-none"
-                placeholder="Write your note..."
-            />
+            <div className="flex flex-col bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-visible w-full">
+                <Toolbar editor={editor} />
+                <div className="flex-grow">
+                    <EditorContent editor={editor} />
+                </div>
+            </div>
         </div>
     );
 }
